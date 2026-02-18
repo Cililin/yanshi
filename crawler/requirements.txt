@@ -1,0 +1,12 @@
+# 研时爬虫系统 - Python依赖
+# 安装命令: pip install -r requirements.txt
+
+# 爬虫核心依赖
+requests==2.31.0
+beautifulsoup4==4.12.2
+lxml==4.9.3
+pymysql==1.1.0
+schedule==1.2.0
+
+# AI功能依赖(通义千问)
+dashscope>=1.14.0
