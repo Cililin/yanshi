@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yanshi.mapper.ArticleMapper">
+
+    <select id="selectArticlePage" resultType="com.yanshi.entity.Article">
+        SELECT * FROM articles
+        <where>
+            <if test="query.source != null and query.source != ''">
+                AND source = #{query.source}
+            </if>
+            <if test="query.category != null and query.category != ''">
+                AND category = #{query.category}
+            </if>
+            <if test="query.startDate != null">
+                AND publish_date &gt;= #{query.startDate}
+            </if>
+            <if test="query.endDate != null">
+                AND publish_date &lt;= #{query.endDate}
+            </if>
+            <if test="query.keyword != null and query.keyword != ''">
+                AND (title LIKE CONCAT('%', #{query.keyword}, '%')
+                    OR content LIKE CONCAT('%', #{query.keyword}, '%')
+                    OR keywords LIKE CONCAT('%', #{query.keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY publish_date DESC, id DESC
+    </select>
+
+    <select id="countBySource" resultType="map">
+        SELECT source, COUNT(*) as count
+        FROM articles
+        GROUP BY source
+        ORDER BY count DESC
+    </select>
+
+    <select id="countByCategory" resultType="map">
+        SELECT category, COUNT(*) as count
+        FROM articles
+        WHERE category IS NOT NULL AND category != ''
+        GROUP BY category
+        ORDER BY count DESC
+    </select>
+
+    <select id="getDateRange" resultType="map">
+        SELECT
+            MIN(publish_date) as minDate,
+            MAX(publish_date) as maxDate
+        FROM articles
+        WHERE publish_date IS NOT NULL
+    </select>
+
+    <select id="countByDate" resultType="map">
+        SELECT
+            DATE_FORMAT(publish_date, '%Y-%m') as date,
+            COUNT(*) as count
+        FROM articles
+        WHERE publish_date IS NOT NULL
+        <if test="startDate != null">
+            AND publish_date &gt;= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND publish_date &lt;= #{endDate}
+        </if>
+        GROUP BY DATE_FORMAT(publish_date, '%Y-%m')
+        ORDER BY date DESC
+    </select>
+
+    <select id="countToday" resultType="long">
+        SELECT COUNT(*)
+        FROM articles
+        WHERE DATE(crawl_time) = CURDATE()
+           OR DATE(created_at) = CURDATE()
+    </select>
+
+</mapper>

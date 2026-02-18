@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yanshi.mapper.ArticleKnowledgeRelationMapper">
+
+    <select id="getByArticleId" resultType="com.yanshi.entity.ArticleKnowledgeRelation">
+        SELECT * FROM article_knowledge_relation
+        WHERE article_id = #{articleId}
+        ORDER BY relevance DESC
+    </select>
+
+    <select id="getByKnowledgePointId" resultType="com.yanshi.entity.ArticleKnowledgeRelation">
+        SELECT * FROM article_knowledge_relation
+        WHERE knowledge_point_id = #{knowledgePointId}
+        ORDER BY relevance DESC
+    </select>
+
+    <select id="countByKnowledgePointId" resultType="int">
+        SELECT COUNT(*) FROM article_knowledge_relation
+        WHERE knowledge_point_id = #{knowledgePointId}
+    </select>
+
+</mapper>

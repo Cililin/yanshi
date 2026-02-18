@@ -1,0 +1,796 @@
+openapi: 3.0.3
+info:
+  title: 研时-考研时政智能分析系统 API
+  description: |
+    ## 研时后端服务 API 文档
+
+    ### 功能概述
+    本系统提供文章管理和知识点管理功能，支持时政新闻的智能分析和知识点梳理。
+
+    ### 认证说明
+    当前版本暂不需要认证。
+
+    ### 响应格式
+    所有接口返回统一格式的响应：
+    ```json
+    {
+      "code": 200,
+      "message": "success",
+      "data": {}
+    }
+    ```
+
+    ### 错误码说明
+    - 200: 成功
+    - 400: 请求参数错误
+    - 404: 资源不存在
+    - 500: 服务器内部错误
+  version: 1.0.0
+  contact:
+    name: 研时团队
+    email: support@yanshi.com
+servers:
+  - url: http://localhost:8080
+    description: 本地开发环境
+
+tags:
+  - name: 文章管理
+    description: 文章相关接口，提供文章的查询、统计等功能
+  - name: 知识点管理
+    description: 知识点相关接口，提供知识点的查询和管理功能
+
+paths:
+  /articles:
+    get:
+      tags:
+        - 文章管理
+      summary: 分页查询文章列表
+      description: 支持多条件筛选和分页查询文章列表
+      operationId: getArticlePage
+      parameters:
+        - name: title
+          in: query
+          description: 文章标题（模糊查询）
+          schema:
+            type: string
+          example: 时政
+        - name: source
+          in: query
+          description: 文章来源
+          schema:
+            type: string
+          example: 人民日报
+        - name: category
+          in: query
+          description: 文章分类
+          schema:
+            type: string
+          example: 政治
+        - name: startDate
+          in: query
+          description: 开始日期（格式：yyyy-MM-dd）
+          schema:
+            type: string
+            format: date
+          example: "2024-01-01"
+        - name: endDate
+          in: query
+          description: 结束日期（格式：yyyy-MM-dd）
+          schema:
+            type: string
+            format: date
+          example: "2024-12-31"
+        - name: current
+          in: query
+          description: 当前页码
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          example: 1
+        - name: size
+          in: query
+          description: 每页条数
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          example: 10
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/IPageArticle'
+              examples:
+                成功示例:
+                  value:
+                    code: 200
+                    message: success
+                    data:
+                      records:
+                        - id: 1
+                          title: 2024年时政要闻
+                          source: 人民日报
+                          url: https://example.com/article/1
+                          urlHash: abc123def456
+                          content: 文章正文内容...
+                          summary: 文章摘要
+                          keywords: 时政,政治,新闻
+                          category: 政治
+                          publishDate: "2024-01-15"
+                          publishTime: "2024-01-15T10:30:00"
+                          crawlTime: "2024-01-15T11:00:00"
+                          importanceScore: 8.5
+                          status: published
+                          createdAt: "2024-01-15T11:00:00"
+                          updatedAt: "2024-01-15T11:00:00"
+                      total: 100
+                      current: 1
+                      size: 10
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
+              example:
+                code: 500
+                message: 服务器内部错误
+                data: null
+
+  /articles/{id}:
+    get:
+      tags:
+        - 文章管理
+      summary: 查询文章详情
+      description: 根据文章ID查询详细信息
+      operationId: getArticleById
+      parameters:
+        - name: id
+          in: path
+          description: 文章ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+          example: 1
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Article'
+              examples:
+                成功示例:
+                  value:
+                    code: 200
+                    message: success
+                    data:
+                      id: 1
+                      title: 2024年时政要闻
+                      source: 人民日报
+                      url: https://example.com/article/1
+                      urlHash: abc123def456
+                      content: 文章正文内容...
+                      summary: 文章摘要
+                      keywords: 时政,政治,新闻
+                      category: 政治
+                      publishDate: "2024-01-15"
+                      publishTime: "2024-01-15T10:30:00"
+                      crawlTime: "2024-01-15T11:00:00"
+                      importanceScore: 8.5
+                      status: published
+                      createdAt: "2024-01-15T11:00:00"
+                      updatedAt: "2024-01-15T11:00:00"
+                文章不存在:
+                  value:
+                    code: 200
+                    message: 文章不存在
+                    data: null
+
+  /articles/recent:
+    get:
+      tags:
+        - 文章管理
+      summary: 获取最新文章
+      description: 获取最近发布的文章列表，按发布时间降序排列
+      operationId: getRecentArticles
+      parameters:
+        - name: limit
+          in: query
+          description: 返回数量限制
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          example: 10
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Article'
+              examples:
+                成功示例:
+                  value:
+                    code: 200
+                    message: success
+                    data:
+                      - id: 1
+                        title: 2024年时政要闻
+                        source: 人民日报
+                        category: 政治
+                        publishDate: "2024-01-15"
+                        importanceScore: 8.5
+                      - id: 2
+                        title: 2024年经济政策
+                        source: 新华社
+                        category: 经济
+                        publishDate: "2024-01-14"
+                        importanceScore: 7.8
+
+  /articles/statistics:
+    get:
+      tags:
+        - 文章管理
+      summary: 获取文章统计信息
+      description: 获取文章总数、来源统计、分类统计等汇总信息
+      operationId: getStatistics
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ArticleStatisticsDTO'
+              examples:
+                成功示例:
+                  value:
+                    code: 200
+                    message: success
+                    data:
+                      totalCount: 1000
+                      sourceCount: 5
+                      categoryCount: 10
+                      latestDate: "2024-01-15"
+
+  /articles/statistics/source:
+    get:
+      tags:
+        - 文章管理
+      summary: 按来源统计文章
+      description: 统计各个来源的文章数量
+      operationId: countBySource
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/SourceStatistics'
+              examples:
+                成功示例:
+                  value:
+                    code: 200
+                    message: success
+                    data:
+                      - source: 人民日报
+                        count: 500
+                      - source: 新华社
+                        count: 300
+                      - source: 央视新闻
+                        count: 200
+
+  /articles/statistics/category:
+    get:
+      tags:
+        - 文章管理
+      summary: 按分类统计文章
+      description: 统计各个分类的文章数量
+      operationId: countByCategory
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CategoryStatistics'
+              examples:
+                成功示例:
+                  value:
+                    code: 200
+                    message: success
+                    data:
+                      - category: 政治
+                        count: 350
+                      - category: 经济
+                        count: 280
+                      - category: 文化
+                        count: 150
+                      - category: 科技
+                        count: 220
+
+  /articles/statistics/date:
+    get:
+      tags:
+        - 文章管理
+      summary: 按日期统计文章
+      description: 统计指定日期范围内的文章发布数量
+      operationId: countByDate
+      parameters:
+        - name: startDate
+          in: query
+          description: 开始日期（格式：yyyy-MM-dd）
+          schema:
+            type: string
+            format: date
+          example: "2024-01-01"
+        - name: endDate
+          in: query
+          description: 结束日期（格式：yyyy-MM-dd）
+          schema:
+            type: string
+            format: date
+          example: "2024-01-31"
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DateStatistics'
+              examples:
+                成功示例:
+                  value:
+                    code: 200
+                    message: success
+                    data:
+                      - date: "2024-01-01"
+                        count: 15
+                      - date: "2024-01-02"
+                        count: 20
+                      - date: "2024-01-03"
+                        count: 18
+
+  /knowledge-points:
+    get:
+      tags:
+        - 知识点管理
+      summary: 获取所有知识点
+      description: 查询系统中的所有知识点
+      operationId: getAllKnowledgePoints
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/KnowledgePoint'
+              examples:
+                成功示例:
+                  value:
+                    code: 200
+                    message: success
+                    data:
+                      - id: 1
+                        name: 马克思主义基本原理
+                        category: 政治
+                        description: 马克思主义基本原理概述
+                        parentId: null
+                      - id: 2
+                        name: 唯物辩证法
+                        category: 政治
+                        description: 唯物辩证法基本原理
+                        parentId: 1
+
+  /knowledge-points/category/{category}:
+    get:
+      tags:
+        - 知识点管理
+      summary: 根据分类查询知识点
+      description: 查询指定分类下的所有知识点
+      operationId: getKnowledgePointsByCategory
+      parameters:
+        - name: category
+          in: path
+          description: 知识点分类
+          required: true
+          schema:
+            type: string
+          example: 政治
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/KnowledgePoint'
+              examples:
+                成功示例:
+                  value:
+                    code: 200
+                    message: success
+                    data:
+                      - id: 1
+                        name: 马克思主义基本原理
+                        category: 政治
+                        description: 马克思主义基本原理概述
+                      - id: 3
+                        name: 毛泽东思想
+                        category: 政治
+                        description: 毛泽东思想基本内容
+
+  /knowledge-points/top:
+    get:
+      tags:
+        - 知识点管理
+      summary: 获取顶级知识点
+      description: 查询所有顶级知识点（parentId为null的知识点）
+      operationId: getTopLevelKnowledgePoints
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/KnowledgePoint'
+              examples:
+                成功示例:
+                  value:
+                    code: 200
+                    message: success
+                    data:
+                      - id: 1
+                        name: 马克思主义基本原理
+                        category: 政治
+                        description: 马克思主义基本原理概述
+                        parentId: null
+                      - id: 10
+                        name: 现代经济学
+                        category: 经济
+                        description: 现代经济学基础理论
+                        parentId: null
+
+  /knowledge-points/{id}:
+    get:
+      tags:
+        - 知识点管理
+      summary: 根据ID查询知识点
+      description: 根据知识点ID查询详细信息
+      operationId: getKnowledgePointById
+      parameters:
+        - name: id
+          in: path
+          description: 知识点ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+          example: 1
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Result'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/KnowledgePoint'
+              examples:
+                成功示例:
+                  value:
+                    code: 200
+                    message: success
+                    data:
+                      id: 1
+                      name: 马克思主义基本原理
+                      category: 政治
+                      description: 马克思主义基本原理概述
+                      parentId: null
+                知识点不存在:
+                  value:
+                    code: 200
+                    message: 知识点不存在
+                    data: null
+
+components:
+  schemas:
+    Result:
+      type: object
+      description: 统一响应结果
+      properties:
+        code:
+          type: integer
+          description: 响应状态码，200表示成功
+          example: 200
+        message:
+          type: string
+          description: 响应消息
+          example: success
+        data:
+          description: 响应数据，类型取决于具体接口
+          type: object
+          nullable: true
+
+    Article:
+      type: object
+      description: 文章实体
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: 文章ID
+          example: 1
+        title:
+          type: string
+          description: 文章标题
+          example: 2024年时政要闻
+        source:
+          type: string
+          description: 文章来源
+          example: 人民日报
+        url:
+          type: string
+          description: 文章URL
+          example: https://example.com/article/1
+        urlHash:
+          type: string
+          description: URL哈希值，用于去重
+          example: abc123def456
+        content:
+          type: string
+          description: 文章内容
+          example: 文章正文内容...
+        summary:
+          type: string
+          description: 文章摘要
+          example: 这是一篇关于时政要闻的文章
+        keywords:
+          type: string
+          description: 关键词，逗号分隔
+          example: 时政,政治,新闻
+        category:
+          type: string
+          description: 文章分类
+          example: 政治
+        publishDate:
+          type: string
+          format: date
+          description: 发布日期
+          example: "2024-01-15"
+        publishTime:
+          type: string
+          format: date-time
+          description: 发布时间
+          example: "2024-01-15T10:30:00"
+        crawlTime:
+          type: string
+          format: date-time
+          description: 爬取时间
+          example: "2024-01-15T11:00:00"
+        importanceScore:
+          type: number
+          format: decimal
+          description: 重要性评分（0-10）
+          example: 8.5
+        status:
+          type: string
+          description: 文章状态
+          enum: [draft, published, archived]
+          example: published
+        createdAt:
+          type: string
+          format: date-time
+          description: 创建时间
+          example: "2024-01-15T11:00:00"
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新时间
+          example: "2024-01-15T11:00:00"
+
+    KnowledgePoint:
+      type: object
+      description: 知识点实体
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: 知识点ID
+          example: 1
+        name:
+          type: string
+          description: 知识点名称
+          example: 马克思主义基本原理
+        category:
+          type: string
+          description: 知识点分类
+          example: 政治
+        description:
+          type: string
+          description: 知识点描述
+          example: 马克思主义基本原理概述
+        parentId:
+          type: integer
+          format: int32
+          description: 父知识点ID，null表示顶级知识点
+          nullable: true
+          example: null
+        createdAt:
+          type: string
+          format: date-time
+          description: 创建时间
+          example: "2024-01-15T10:00:00"
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新时间
+          example: "2024-01-15T10:00:00"
+
+    ArticleStatisticsDTO:
+      type: object
+      description: 文章统计信息
+      properties:
+        totalCount:
+          type: integer
+          format: int64
+          description: 文章总数
+          example: 1000
+        sourceCount:
+          type: integer
+          description: 来源数量
+          example: 5
+        categoryCount:
+          type: integer
+          description: 分类数量
+          example: 10
+        latestDate:
+          type: string
+          format: date
+          description: 最新文章日期
+          example: "2024-01-15"
+
+    SourceStatistics:
+      type: object
+      description: 来源统计数据
+      properties:
+        source:
+          type: string
+          description: 来源名称
+          example: 人民日报
+        count:
+          type: integer
+          format: int64
+          description: 文章数量
+          example: 500
+
+    CategoryStatistics:
+      type: object
+      description: 分类统计数据
+      properties:
+        category:
+          type: string
+          description: 分类名称
+          example: 政治
+        count:
+          type: integer
+          format: int64
+          description: 文章数量
+          example: 350
+
+    DateStatistics:
+      type: object
+      description: 日期统计数据
+      properties:
+        date:
+          type: string
+          format: date
+          description: 日期
+          example: "2024-01-01"
+        count:
+          type: integer
+          format: int64
+          description: 文章数量
+          example: 15
+
+    IPageArticle:
+      type: object
+      description: 分页结果
+      properties:
+        records:
+          type: array
+          description: 数据列表
+          items:
+            $ref: '#/components/schemas/Article'
+        total:
+          type: integer
+          format: int64
+          description: 总记录数
+          example: 100
+        current:
+          type: integer
+          description: 当前页码
+          example: 1
+        size:
+          type: integer
+          description: 每页条数
+          example: 10
+        pages:
+          type: integer
+          description: 总页数
+          example: 10

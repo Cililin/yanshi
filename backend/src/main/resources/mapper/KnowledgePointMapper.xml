@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yanshi.mapper.KnowledgePointMapper">
+
+    <select id="findSimilarPoints" resultType="com.yanshi.entity.KnowledgePoint">
+        SELECT * FROM knowledge_points
+        WHERE name LIKE CONCAT(#{name}, '%')
+        <if test="category != null and category != ''">
+            AND category = #{category}
+        </if>
+        ORDER BY article_count ASC
+        LIMIT 5
+    </select>
+
+    <select id="countByCategory" resultType="com.yanshi.entity.KnowledgePoint">
+        SELECT category, COUNT(*) as id
+        FROM knowledge_points
+        GROUP BY category
+        ORDER BY category
+    </select>
+
+    <select id="getTopPoints" resultType="com.yanshi.entity.KnowledgePoint">
+        SELECT * FROM knowledge_points
+        WHERE article_count > 0
+        ORDER BY importance_score DESC, article_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="search" resultType="com.yanshi.entity.KnowledgePoint">
+        SELECT * FROM knowledge_points
+        WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND (name LIKE CONCAT('%', #{keyword}, '%')
+                 OR keywords LIKE CONCAT('%', #{keyword}, '%')
+                 OR description LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="type != null and type != ''">
+            AND type = #{type}
+        </if>
+        <if test="category != null and category != ''">
+            AND category = #{category}
+        </if>
+        ORDER BY importance_score DESC, article_count DESC
+    </select>
+
+    <select id="getByArticleId" resultType="com.yanshi.entity.KnowledgePoint">
+        SELECT kp.* FROM knowledge_points kp
+        INNER JOIN article_knowledge_relation akr ON kp.id = akr.knowledge_point_id
+        WHERE akr.article_id = #{articleId}
+        ORDER BY akr.relevance DESC
+    </select>
+
+</mapper>

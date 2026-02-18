@@ -1,0 +1,572 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "研时-考研时政智能分析系统 API 测试用例",
+    "version": "1.0.0",
+    "description": "Apifox 测试用例集合，包含所有接口的测试示例"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "本地开发环境"
+    }
+  ],
+  "paths": {
+    "/articles": {
+      "get": {
+        "summary": "分页查询文章列表",
+        "tags": ["文章管理"],
+        "parameters": [
+          {
+            "name": "title",
+            "in": "query",
+            "description": "文章标题（模糊查询）",
+            "schema": {
+              "type": "string",
+              "example": "时政"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "description": "文章来源",
+            "schema": {
+              "type": "string",
+              "example": "人民日报"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "文章分类",
+            "schema": {
+              "type": "string",
+              "example": "政治"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "开始日期",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2024-01-01"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "结束日期",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2024-12-31"
+            }
+          },
+          {
+            "name": "current",
+            "in": "query",
+            "description": "当前页码",
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "example": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "每页条数",
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "example": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": 200,
+                  "message": "success",
+                  "data": {
+                    "records": [
+                      {
+                        "id": 1,
+                        "title": "2024年时政要闻",
+                        "source": "人民日报",
+                        "url": "https://example.com/article/1",
+                        "urlHash": "abc123def456",
+                        "content": "文章正文内容...",
+                        "summary": "文章摘要",
+                        "keywords": "时政,政治,新闻",
+                        "category": "政治",
+                        "publishDate": "2024-01-15",
+                        "publishTime": "2024-01-15T10:30:00",
+                        "crawlTime": "2024-01-15T11:00:00",
+                        "importanceScore": 8.5,
+                        "status": "published",
+                        "createdAt": "2024-01-15T11:00:00",
+                        "updatedAt": "2024-01-15T11:00:00"
+                      }
+                    ],
+                    "total": 100,
+                    "current": 1,
+                    "size": 10,
+                    "pages": 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-apifox-folder": "文章管理"
+      }
+    },
+    "/articles/{id}": {
+      "get": {
+        "summary": "查询文章详情",
+        "tags": ["文章管理"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "文章ID",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": 200,
+                  "message": "success",
+                  "data": {
+                    "id": 1,
+                    "title": "2024年时政要闻",
+                    "source": "人民日报",
+                    "url": "https://example.com/article/1",
+                    "urlHash": "abc123def456",
+                    "content": "文章正文内容...",
+                    "summary": "文章摘要",
+                    "keywords": "时政,政治,新闻",
+                    "category": "政治",
+                    "publishDate": "2024-01-15",
+                    "publishTime": "2024-01-15T10:30:00",
+                    "crawlTime": "2024-01-15T11:00:00",
+                    "importanceScore": 8.5,
+                    "status": "published",
+                    "createdAt": "2024-01-15T11:00:00",
+                    "updatedAt": "2024-01-15T11:00:00"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-apifox-folder": "文章管理"
+      }
+    },
+    "/articles/recent": {
+      "get": {
+        "summary": "获取最新文章",
+        "tags": ["文章管理"],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "返回数量限制",
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "maximum": 100,
+              "example": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": 200,
+                  "message": "success",
+                  "data": [
+                    {
+                      "id": 1,
+                      "title": "2024年时政要闻",
+                      "source": "人民日报",
+                      "category": "政治",
+                      "publishDate": "2024-01-15",
+                      "importanceScore": 8.5
+                    },
+                    {
+                      "id": 2,
+                      "title": "2024年经济政策",
+                      "source": "新华社",
+                      "category": "经济",
+                      "publishDate": "2024-01-14",
+                      "importanceScore": 7.8
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-apifox-folder": "文章管理"
+      }
+    },
+    "/articles/statistics": {
+      "get": {
+        "summary": "获取文章统计信息",
+        "tags": ["文章管理"],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": 200,
+                  "message": "success",
+                  "data": {
+                    "totalCount": 1000,
+                    "sourceCount": 5,
+                    "categoryCount": 10,
+                    "latestDate": "2024-01-15"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-apifox-folder": "文章管理"
+      }
+    },
+    "/articles/statistics/source": {
+      "get": {
+        "summary": "按来源统计文章",
+        "tags": ["文章管理"],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": 200,
+                  "message": "success",
+                  "data": [
+                    {
+                      "source": "人民日报",
+                      "count": 500
+                    },
+                    {
+                      "source": "新华社",
+                      "count": 300
+                    },
+                    {
+                      "source": "央视新闻",
+                      "count": 200
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-apifox-folder": "文章管理"
+      }
+    },
+    "/articles/statistics/category": {
+      "get": {
+        "summary": "按分类统计文章",
+        "tags": ["文章管理"],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": 200,
+                  "message": "success",
+                  "data": [
+                    {
+                      "category": "政治",
+                      "count": 350
+                    },
+                    {
+                      "category": "经济",
+                      "count": 280
+                    },
+                    {
+                      "category": "文化",
+                      "count": 150
+                    },
+                    {
+                      "category": "科技",
+                      "count": 220
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-apifox-folder": "文章管理"
+      }
+    },
+    "/articles/statistics/date": {
+      "get": {
+        "summary": "按日期统计文章",
+        "tags": ["文章管理"],
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "开始日期",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2024-01-01"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "结束日期",
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2024-01-31"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": 200,
+                  "message": "success",
+                  "data": [
+                    {
+                      "date": "2024-01-01",
+                      "count": 15
+                    },
+                    {
+                      "date": "2024-01-02",
+                      "count": 20
+                    },
+                    {
+                      "date": "2024-01-03",
+                      "count": 18
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-apifox-folder": "文章管理"
+      }
+    },
+    "/knowledge-points": {
+      "get": {
+        "summary": "获取所有知识点",
+        "tags": ["知识点管理"],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": 200,
+                  "message": "success",
+                  "data": [
+                    {
+                      "id": 1,
+                      "name": "马克思主义基本原理",
+                      "category": "政治",
+                      "description": "马克思主义基本原理概述",
+                      "parentId": null,
+                      "createdAt": "2024-01-15T10:00:00",
+                      "updatedAt": "2024-01-15T10:00:00"
+                    },
+                    {
+                      "id": 2,
+                      "name": "唯物辩证法",
+                      "category": "政治",
+                      "description": "唯物辩证法基本原理",
+                      "parentId": 1,
+                      "createdAt": "2024-01-15T10:00:00",
+                      "updatedAt": "2024-01-15T10:00:00"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-apifox-folder": "知识点管理"
+      }
+    },
+    "/knowledge-points/category/{category}": {
+      "get": {
+        "summary": "根据分类查询知识点",
+        "tags": ["知识点管理"],
+        "parameters": [
+          {
+            "name": "category",
+            "in": "path",
+            "required": true,
+            "description": "知识点分类",
+            "schema": {
+              "type": "string",
+              "example": "政治"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": 200,
+                  "message": "success",
+                  "data": [
+                    {
+                      "id": 1,
+                      "name": "马克思主义基本原理",
+                      "category": "政治",
+                      "description": "马克思主义基本原理概述",
+                      "createdAt": "2024-01-15T10:00:00",
+                      "updatedAt": "2024-01-15T10:00:00"
+                    },
+                    {
+                      "id": 3,
+                      "name": "毛泽东思想",
+                      "category": "政治",
+                      "description": "毛泽东思想基本内容",
+                      "createdAt": "2024-01-15T10:00:00",
+                      "updatedAt": "2024-01-15T10:00:00"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-apifox-folder": "知识点管理"
+      }
+    },
+    "/knowledge-points/top": {
+      "get": {
+        "summary": "获取顶级知识点",
+        "tags": ["知识点管理"],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": 200,
+                  "message": "success",
+                  "data": [
+                    {
+                      "id": 1,
+                      "name": "马克思主义基本原理",
+                      "category": "政治",
+                      "description": "马克思主义基本原理概述",
+                      "parentId": null,
+                      "createdAt": "2024-01-15T10:00:00",
+                      "updatedAt": "2024-01-15T10:00:00"
+                    },
+                    {
+                      "id": 10,
+                      "name": "现代经济学",
+                      "category": "经济",
+                      "description": "现代经济学基础理论",
+                      "parentId": null,
+                      "createdAt": "2024-01-15T10:00:00",
+                      "updatedAt": "2024-01-15T10:00:00"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "x-apifox-folder": "知识点管理"
+      }
+    },
+    "/knowledge-points/{id}": {
+      "get": {
+        "summary": "根据ID查询知识点",
+        "tags": ["知识点管理"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "知识点ID",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": 200,
+                  "message": "success",
+                  "data": {
+                    "id": 1,
+                    "name": "马克思主义基本原理",
+                    "category": "政治",
+                    "description": "马克思主义基本原理概述",
+                    "parentId": null,
+                    "createdAt": "2024-01-15T10:00:00",
+                    "updatedAt": "2024-01-15T10:00:00"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-apifox-folder": "知识点管理"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "文章管理",
+      "description": "文章相关接口"
+    },
+    {
+      "name": "知识点管理",
+      "description": "知识点相关接口"
+    }
+  ],
+  "x-apifox-import-config": {
+    "folder": "研时API"
+  }
+}
