@@ -44,7 +44,7 @@ mybatis-plus:
 ai:
   qwen:
     # 通义千问API密钥
-    api-key: sk-51a2848a5705490b900983f307965798
+    api-key: xx
     model: qwen-turbo
     max-tokens: 1000
     temperature: 0.7
